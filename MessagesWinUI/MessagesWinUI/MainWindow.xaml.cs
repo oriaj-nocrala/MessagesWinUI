@@ -13,6 +13,9 @@ using System.Threading.Tasks;
 using Windows.UI;
 using Microsoft.UI;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace MessagesWinUI;
 
@@ -418,26 +421,49 @@ public sealed partial class MainWindow : Window
         inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        inputGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
         var messageTextBox = new TextBox
         {
-            PlaceholderText = "Type your message here...",
+            PlaceholderText = "Type your message here... 😊✨",
             MinHeight = 36,
             AcceptsReturn = false,
-            TextWrapping = TextWrapping.Wrap
+            TextWrapping = TextWrapping.Wrap,
+            // Enhanced Unicode and international input support
+            FontFamily = new Microsoft.UI.Xaml.Media.FontFamily("Segoe UI Emoji, Segoe UI, Arial, sans-serif"),
+            InputScope = new InputScope
+            {
+                Names = { new InputScopeName { NameValue = InputScopeNameValue.Text } }
+            },
+            IsSpellCheckEnabled = true,
+            IsTextPredictionEnabled = true,
+            CharacterSpacing = 20 // Better spacing for emojis and special chars
         };
         messageTextBox.KeyDown += (s, e) => TabMessageTextBox_KeyDown(s, e, peerId);
         Grid.SetColumn(messageTextBox, 0);
         inputGrid.Children.Add(messageTextBox);
 
+        // Emoji picker button
+        var emojiButton = new Button
+        {
+            Content = "😊",
+            Margin = new Thickness(8, 0, 0, 0),
+            FontFamily = new Microsoft.UI.Xaml.Media.FontFamily("Segoe UI Emoji"),
+            ToolTipService.ToolTip = "Add Emoji"
+        };
+        emojiButton.Click += (s, e) => ShowEmojiPicker(messageTextBox);
+        Grid.SetColumn(emojiButton, 1);
+        inputGrid.Children.Add(emojiButton);
+
         var sendFileButton = new Button
         {
             Content = "📁",
-            Margin = new Thickness(8, 0, 0, 0)
+            Margin = new Thickness(8, 0, 0, 0),
+            FontFamily = new Microsoft.UI.Xaml.Media.FontFamily("Segoe UI Emoji")
         };
         sendFileButton.Click += (s, e) => TabSendFileButton_Click(s, e, peerId);
         ToolTipService.SetToolTip(sendFileButton, "Send File");
-        Grid.SetColumn(sendFileButton, 1);
+        Grid.SetColumn(sendFileButton, 2);
         inputGrid.Children.Add(sendFileButton);
 
         var sendButton = new Button
@@ -446,7 +472,7 @@ public sealed partial class MainWindow : Window
             Margin = new Thickness(8, 0, 0, 0)
         };
         sendButton.Click += (s, e) => TabSendButton_Click(s, e, peerId);
-        Grid.SetColumn(sendButton, 2);
+        Grid.SetColumn(sendButton, 3);
         inputGrid.Children.Add(sendButton);
 
         inputBorder.Child = inputGrid;
@@ -577,6 +603,9 @@ public sealed partial class MainWindow : Window
         if (string.IsNullOrEmpty(message))
             return;
 
+        // Process Unicode text before sending
+        message = ProcessUnicodeText(message);
+
         try
         {
             _messenger?.SendTextMessage(peerId, message);
@@ -622,18 +651,26 @@ public sealed partial class MainWindow : Window
         
         var senderText = new TextBlock
         {
-            Text = message.SenderName,
+            Text = ProcessUnicodeText(message.SenderName),
             FontSize = 11,
             FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
             Foreground = message.IsFromMe ? new SolidColorBrush(Colors.White) : new SolidColorBrush(Colors.Black),
-            Margin = new Thickness(0, 0, 0, 2)
+            Margin = new Thickness(0, 0, 0, 2),
+            // Unicode support enhancements
+            TextTrimming = TextTrimming.None,
+            IsTextSelectionEnabled = true
         };
         
         var messageText = new TextBlock
         {
-            Text = message.Content,
+            Text = ProcessUnicodeText(message.Content),
             TextWrapping = TextWrapping.Wrap,
-            Foreground = message.IsFromMe ? new SolidColorBrush(Colors.White) : new SolidColorBrush(Colors.Black)
+            Foreground = message.IsFromMe ? new SolidColorBrush(Colors.White) : new SolidColorBrush(Colors.Black),
+            // Enhanced Unicode and emoji support
+            FontFamily = new Microsoft.UI.Xaml.Media.FontFamily("Segoe UI Emoji, Segoe UI, Arial, sans-serif"),
+            TextTrimming = TextTrimming.None,
+            IsTextSelectionEnabled = true,
+            LineHeight = 20 // Better line spacing for emojis
         };
         
         var timestampText = new TextBlock
@@ -651,6 +688,109 @@ public sealed partial class MainWindow : Window
         messagePanel.Child = contentPanel;
         
         return messagePanel;
+    }
+
+    /// <summary>
+    /// Enhanced Unicode text processing for better emoji and international character support
+    /// </summary>
+    private string ProcessUnicodeText(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return text;
+
+        // Normalize Unicode text to composed form (NFC)
+        text = text.Normalize(NormalizationForm.FormC);
+
+        // Ensure proper display of emoji sequences
+        text = ProcessEmojiSequences(text);
+
+        return text;
+    }
+
+    /// <summary>
+    /// Process emoji sequences to ensure proper rendering
+    /// </summary>
+    private string ProcessEmojiSequences(string text)
+    {
+        // Handle zero-width joiners (ZWJ) and variation selectors for proper emoji display
+        // This ensures complex emoji like family emojis or profession emojis render correctly
+        return text; // WinUI 3 handles most emoji sequences automatically, but this can be extended
+    }
+
+    /// <summary>
+    /// Detect if text contains emojis for optimized rendering
+    /// </summary>
+    private bool ContainsEmojis(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return false;
+
+        // Simple emoji detection - can be enhanced with more comprehensive ranges
+        foreach (char c in text)
+        {
+            // Check for common emoji ranges
+            if (c >= 0x1F600 && c <= 0x1F64F || // Emoticons
+                c >= 0x1F300 && c <= 0x1F5FF || // Misc Symbols and Pictographs
+                c >= 0x1F680 && c <= 0x1F6FF || // Transport and Map Symbols
+                c >= 0x1F1E0 && c <= 0x1F1FF || // Regional indicators (flags)
+                c >= 0x2600 && c <= 0x26FF ||   // Misc symbols
+                c >= 0x2700 && c <= 0x27BF)     // Dingbats
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Show emoji picker menu for inserting common emojis
+    /// </summary>
+    private void ShowEmojiPicker(TextBox targetTextBox)
+    {
+        var emojiMenuFlyout = new MenuFlyout();
+
+        // Common emojis organized by category
+        var emojis = new[]
+        {
+            new { Category = "Smileys", Items = new[] { "😊", "😂", "😍", "😎", "😢", "😡", "🤔", "👍", "👎", "❤️" } },
+            new { Category = "Objects", Items = new[] { "🎉", "🎈", "🎁", "💡", "📱", "💻", "🔥", "⭐", "✨", "🚀" } },
+            new { Category = "Nature", Items = new[] { "🌟", "🌈", "🌸", "🌺", "🍀", "🌊", "⚡", "☀️", "🌙", "🔥" } }
+        };
+
+        foreach (var category in emojis)
+        {
+            // Add category separator
+            var categoryItem = new MenuFlyoutSeparator();
+            emojiMenuFlyout.Items.Add(categoryItem);
+
+            // Add emojis in this category
+            foreach (var emoji in category.Items)
+            {
+                var menuItem = new MenuFlyoutItem
+                {
+                    Text = emoji,
+                    FontFamily = new Microsoft.UI.Xaml.Media.FontFamily("Segoe UI Emoji"),
+                    FontSize = 16
+                };
+                
+                menuItem.Click += (s, e) =>
+                {
+                    // Insert emoji at cursor position
+                    var cursorPosition = targetTextBox.SelectionStart;
+                    var currentText = targetTextBox.Text;
+                    var newText = currentText.Insert(cursorPosition, emoji);
+                    targetTextBox.Text = newText;
+                    targetTextBox.SelectionStart = cursorPosition + emoji.Length;
+                    targetTextBox.Focus(FocusState.Programmatic);
+                };
+
+                emojiMenuFlyout.Items.Add(menuItem);
+            }
+        }
+
+        // Show the flyout at the emoji button
+        emojiMenuFlyout.ShowAt(targetTextBox);
     }
 
     private void ConnectButton_Click(object sender, RoutedEventArgs e)
