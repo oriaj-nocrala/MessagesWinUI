@@ -5,16 +5,17 @@
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%2F11-green)](https://www.microsoft.com/windows/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
-A modern **peer-to-peer messaging application** built with **WinUI 3** and **Rust**, featuring a sleek MSN Messenger-inspired interface for seamless local network communication.
+A modern **peer-to-peer messaging application** built with **WinUI 3** and **Rust**, featuring a sleek MSN Messenger-inspired interface with **professional MVVM architecture** for seamless local network communication.
 
 ## ✨ Features
 
 ### 🎨 Modern UI/UX
 - **MSN Messenger-style interface** with contemporary WinUI 3 design
-- **Tabbed conversations** - Each peer gets its own tab for intuitive multi-chat management  
-- **Message bubbles** with sender identification and timestamps
+- **Professional MVVM architecture** - ViewModels, Commands, declarative XAML
+- **Multilingual support** - English/Spanish localization with .resw files
 - **Real-time peer discovery** with live connection status
 - **Dark/Light theme support** following system preferences
+- **Message bubbles** with sender identification and timestamps
 
 ### 🔗 P2P Networking  
 - **Zero-server architecture** - Direct peer-to-peer communication
@@ -24,11 +25,41 @@ A modern **peer-to-peer messaging application** built with **WinUI 3** and **Rus
 - **Multi-peer support** - Connect to multiple friends simultaneously
 
 ### 📱 Chat Experience
+- **Professional UserControls** - ConversationPanel, EmojiPicker
 - **Message persistence** - Conversations saved per peer
 - **Auto-scroll** to latest messages with smooth animations
 - **Enter-to-send** keyboard shortcuts
-- **Connection status indicators** 
-- **Typing notifications** and delivery confirmations
+- **Connection status indicators**
+- **Emoji support** with organized picker
+
+## 🏗️ Architecture
+
+### Modern MVVM Implementation
+
+```
+┌─────────────────────────┐
+│   WinUI 3 XAML Views    │  ← Declarative UI with data binding
+├─────────────────────────┤
+│   ViewModels Layer      │  ← Business logic, Commands, INotifyPropertyChanged
+├─────────────────────────┤
+│   Models & Services     │  ← Data models, P2P integration
+├─────────────────────────┤  
+│   C# P/Invoke Layer     │  ← NativeMethods.cs - FFI bridge
+├─────────────────────────┤
+│   Rust C FFI Exports    │  ← Foreign Function Interface
+├─────────────────────────┤
+│   Rust P2P Core         │  ← High-performance networking engine
+└─────────────────────────┘
+```
+
+### Key MVVM Components
+
+- **BaseViewModel** - INotifyPropertyChanged base class with helpers
+- **MainWindowViewModel** - Main business logic, peer management, commands  
+- **ConversationViewModel** - Individual chat session management
+- **RelayCommand** - ICommand implementation for MVVM binding
+- **Professional DataTemplates** - Declarative UI with converters
+- **Localization System** - Resource-based multilingual support
 
 ## 🚀 Getting Started
 
@@ -67,45 +98,33 @@ A modern **peer-to-peer messaging application** built with **WinUI 3** and **Rus
    dotnet run
    ```
 
-### 📦 Creating Installation Package
-
-To create an MSIX installer:
-
-1. **Generate self-signed certificate** (first time only):
-   ```powershell
-   New-SelfSignedCertificate -Type Custom -Subject "CN=MessagesWinUI" -KeyUsage DigitalSignature -FriendlyName "MessagesWinUI Certificate" -CertStoreLocation "Cert:\CurrentUser\My" -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3", "2.5.29.19={text}")
-   ```
-
-2. **Build packaging project**:
-   ```bash
-   # Build the package project
-   msbuild "MessagesWinUI (Package)/MessagesWinUI (Package).wapproj" -p:Configuration=Release -p:Platform=x64
-   ```
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────┐
-│   WinUI 3 App       │  ← Modern Windows UI with tabs, themes
-├─────────────────────┤
-│  C# High-Level API  │  ← P2PMessenger.cs - Event-driven wrapper
-├─────────────────────┤  
-│   P/Invoke Layer    │  ← NativeMethods.cs - FFI bridge
-├─────────────────────┤
-│   Rust C FFI       │  ← Foreign Function Interface exports
-├─────────────────────┤
-│  Rust P2P Core      │  ← High-performance networking engine
-└─────────────────────┘
-```
-
-### Key Components
-
-- **MainWindow.xaml** - MSN-style UI with peer list and tabbed chat areas
-- **P2PMessenger.cs** - High-level C# API wrapping the Rust library
-- **NativeMethods.cs** - P/Invoke declarations for Rust FFI
-- **rust_sockets library** - Core P2P networking, discovery, and messaging
-
 ## 🔧 Technical Details
+
+### Professional MVVM Pattern
+
+- **Separation of Concerns** - Views handle UI, ViewModels handle logic
+- **Data Binding** - Declarative XAML with two-way binding
+- **Commands Pattern** - Button clicks through ICommand implementations
+- **Event-Driven Architecture** - PropertyChanged notifications for reactive UI
+- **Resource Management** - Proper disposal patterns and memory management
+
+### Localization System
+
+```xml
+<!-- XAML uses resource keys -->
+<TextBlock Text="{Binding WelcomeTitleText}" />
+```
+
+```csharp
+// ViewModel exposes localized properties
+public string WelcomeTitleText => LocalizationHelper.GetString("WelcomeTitle");
+```
+
+```
+Strings/
+├── en/Resources.resw     # English resources
+└── es/Resources.resw     # Spanish resources
+```
 
 ### Message Protocol
 - **Discovery**: UDP broadcast on port 6968 for peer detection
@@ -113,32 +132,15 @@ To create an MSIX installer:
 - **Serialization**: Efficient binary protocol with Protocol Buffers
 - **File Transfer**: Embedded in message protocol with progress tracking
 
-### Network Discovery
-- **Dynamic broadcast detection** - Automatically detects network interfaces
-- **Multi-strategy discovery** - Localhost + interface broadcast + multicast fallback
-- **Cross-subnet support** - Works across different network segments
-- **Firewall-friendly** - Uses standard ports with proper error handling
-
-### Performance
-- **Async/await architecture** - Non-blocking UI with background networking
-- **Memory management** - Automatic cleanup of peer connections and message history
-- **Resource limits** - Configurable message history limits (1000 messages per peer)
-
 ## 🎯 Usage
 
-1. **Launch the application** - MessagesWinUI starts automatically
-2. **Peer discovery** - Click "Discover Peers" or wait for automatic detection
-3. **Connect to friends** - Click "Connect" next to discovered peers
-4. **Start chatting** - Each connected peer gets their own tab
-5. **Send files** - Use the 📁 button to share files
-6. **Multi-chat** - Switch between conversation tabs seamlessly
-
-### Network Configuration
-
-For optimal peer discovery across networks:
-- **Local network**: Works automatically with default settings
-- **Corporate networks**: May require firewall configuration for UDP broadcast
-- **VPN environments**: Ensure UDP ports 6968 and TCP 6969 are accessible
+1. **Launch the application** - MessagesWinUI starts with professional MVVM UI
+2. **Language Detection** - Automatically detects system language (EN/ES)
+3. **Peer discovery** - Click "Discover Peers" or automatic detection
+4. **Connect to friends** - Click "Connect" next to discovered peers
+5. **Start chatting** - Professional conversation panels with message history
+6. **Send files** - Use file picker for sharing documents
+7. **Emoji support** - Click emoji button for organized emoji picker
 
 ## 🛠️ Development
 
@@ -147,9 +149,28 @@ For optimal peer discovery across networks:
 ```
 MessagesWinUI/
 ├── MessagesWinUI/                    # Main WinUI 3 project  
-│   ├── MainWindow.xaml               # MSN Messenger-style UI
-│   ├── MainWindow.xaml.cs            # UI logic and P2P integration
-│   ├── Models/PeerInfo.cs            # Data models
+│   ├── MainWindow.xaml               # Main declarative UI
+│   ├── MainWindow.xaml.cs            # Minimal MVVM code-behind
+│   ├── ViewModels/                   # MVVM ViewModels
+│   │   ├── BaseViewModel.cs          # INotifyPropertyChanged base
+│   │   ├── MainWindowViewModel.cs    # Main business logic
+│   │   └── ConversationViewModel.cs  # Chat session logic
+│   ├── Commands/                     # MVVM Commands
+│   │   └── RelayCommand.cs           # ICommand implementation
+│   ├── Controls/                     # Professional UserControls
+│   │   ├── ConversationPanel.xaml    # Chat UI component
+│   │   └── EmojiPicker.xaml          # Emoji selection control
+│   ├── Models/                       # Data models
+│   │   └── PeerInfo.cs               # Peer information model
+│   ├── Converters/                   # XAML Value Converters
+│   │   └── MessageConverters.cs      # UI binding converters
+│   ├── Helpers/                      # Utility classes
+│   │   └── LocalizationHelper.cs     # Multilingual support
+│   ├── Resources/                    # XAML Resources
+│   │   └── DataTemplates.xaml        # Declarative UI templates
+│   ├── Strings/                      # Localization resources
+│   │   ├── en/Resources.resw         # English strings
+│   │   └── es/Resources.resw         # Spanish strings
 │   ├── Interop/                      # P/Invoke wrapper classes
 │   │   ├── P2PMessenger.cs           # High-level C# API
 │   │   ├── NativeMethods.cs          # P/Invoke declarations  
@@ -167,12 +188,20 @@ dotnet build -c Debug
 # Release build  
 dotnet build -c Release
 
-# Run tests (when available)
-dotnet test
+# Run with specific culture for testing localization
+dotnet run -- --culture es
 
 # Create package
 msbuild "MessagesWinUI (Package)/MessagesWinUI (Package).wapproj" -p:Configuration=Release
 ```
+
+### MVVM Development Guidelines
+
+1. **ViewModels** - All business logic goes here, never in code-behind
+2. **Commands** - Use RelayCommand for button clicks and user actions
+3. **Data Binding** - Prefer declarative XAML over imperative code
+4. **Localization** - Always use resource keys, never hardcode strings
+5. **Converters** - Use for complex UI transformations in XAML
 
 ### Dependencies
 
@@ -183,15 +212,30 @@ The Rust library dependency is **not included** in this repository. You must:
 3. Copy `archsockrust.dll` to the WinUI project directory
 4. The `.gitignore` explicitly excludes this library to keep repos separate
 
+## 🌍 Localization
+
+The app supports multiple languages through .resw resource files:
+
+- **English (Default)** - `Strings/en/Resources.resw`
+- **Spanish** - `Strings/es/Resources.resw`
+
+To add a new language:
+1. Create `Strings/{language-code}/Resources.resw`
+2. Translate all string keys from English version
+3. Test with `dotnet run -- --culture {language-code}`
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+**Development Setup:**
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+3. Follow MVVM patterns and existing code style
+4. Test both English and Spanish UI
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
 
 ## 📄 License
 
@@ -209,9 +253,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Rust community** for the powerful systems programming language
 - **Protocol Buffers** for efficient cross-language serialization
 - **MSN Messenger** for the UI inspiration
+- **MVVM Pattern** for clean separation of concerns
 
 ---
 
 ⭐ **Star this repo if you find it useful!** ⭐
 
-Made with ❤️ and modern Windows development tools
+Made with ❤️, professional MVVM architecture, and modern Windows development tools
