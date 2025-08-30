@@ -9,6 +9,7 @@
     xmlns:helpers="using:MessagesWinUI.Helpers"
     xmlns:viewmodels="using:MessagesWinUI.ViewModels"
     xmlns:controls="using:MessagesWinUI.Controls"
+    xmlns:models="using:MessagesWinUI.Models"
     mc:Ignorable="d"
     Title="{x:Bind ViewModel.AppTitle}">
 
@@ -63,11 +64,83 @@
                     
                     <ListView Grid.Row="1" 
                               ItemsSource="{Binding Peers, Mode=OneWay}"
-                              ItemTemplate="{StaticResource PeerItemTemplate}"
                               SelectionMode="Single"
                               SelectedItem="{Binding SelectedPeer, Mode=TwoWay}"
                               ItemClick="PeersListView_ItemClick"
                               IsItemClickEnabled="True">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Padding="12,8" Background="Transparent">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <!-- Avatar -->
+                                    <PersonPicture 
+                                        Grid.Column="0"
+                                        Width="32" 
+                                        Height="32" 
+                                        DisplayName="{Binding Name}" 
+                                        Margin="0,0,12,0" />
+                                    
+                                    <!-- Peer Info -->
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock 
+                                            Text="{Binding Name}" 
+                                            FontWeight="SemiBold" 
+                                            FontSize="14" 
+                                            TextTrimming="CharacterEllipsis" />
+                                        <TextBlock 
+                                            Text="{Binding Status}" 
+                                            FontSize="12" 
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <TextBlock 
+                                            Text="{Binding LastSeenDisplay}" 
+                                            FontSize="11" 
+                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                    </StackPanel>
+                                    
+                                    <!-- Connection Button/Status -->
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                        <Button 
+                                            Content="Connect"
+                                            FontSize="11" 
+                                            Padding="12,4" 
+                                            Click="ConnectButton_Click"
+                                            CommandParameter="{Binding Id}">
+                                            <Button.Visibility>
+                                                <Binding Path="IsConnected" Mode="OneWay">
+                                                    <Binding.Converter>
+                                                        <local:InverseBooleanToVisibilityConverter />
+                                                    </Binding.Converter>
+                                                </Binding>
+                                            </Button.Visibility>
+                                        </Button>
+                                        
+                                        <Border
+                                            Background="{ThemeResource SystemFillColorSuccessBackground}"
+                                            CornerRadius="12"
+                                            Padding="8,2">
+                                            <Border.Visibility>
+                                                <Binding Path="IsConnected" Mode="OneWay">
+                                                    <Binding.Converter>
+                                                        <local:BooleanToVisibilityConverter />
+                                                    </Binding.Converter>
+                                                </Binding>
+                                            </Border.Visibility>
+                                            <TextBlock 
+                                                Text="Connected" 
+                                                FontSize="10"
+                                                FontWeight="SemiBold"
+                                                Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                                HorizontalAlignment="Center" />
+                                        </Border>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -95,14 +168,20 @@
                 <!-- Conversations TabView -->
                 <!-- Conversations will be displayed using data binding -->
                 <ContentControl Content="{Binding SelectedConversation, Mode=OneWay}"
-                               Visibility="{Binding SelectedConversation, Converter={StaticResource BooleanToVisibilityConverter}}">
+                               Visibility="{Binding SelectedConversation, Converter={StaticResource NullToInverseVisibilityConverter}}"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Stretch"
+                               HorizontalContentAlignment="Stretch"
+                               VerticalContentAlignment="Stretch">
                     <ContentControl.ContentTemplate>
-                        <DataTemplate x:DataType="viewmodels:ConversationViewModel">
+                        <DataTemplate>
                             <controls:ConversationPanel 
-                                PeerName="{x:Bind PeerName, Mode=OneWay}"
-                                PeerStatus="{x:Bind PeerStatus, Mode=OneWay}"
+                                PeerName="{Binding PeerName, Mode=OneWay}"
+                                PeerStatus="{Binding PeerStatus, Mode=OneWay}"
                                 MessageSent="ConversationPanel_MessageSent"
-                                FileSent="ConversationPanel_FileSent" />
+                                FileSent="ConversationPanel_FileSent" 
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch" />
                         </DataTemplate>
                     </ContentControl.ContentTemplate>
                 </ContentControl>

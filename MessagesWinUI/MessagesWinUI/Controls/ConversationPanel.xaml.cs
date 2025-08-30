@@ -16,8 +16,6 @@ namespace MessagesWinUI.Controls;
 public sealed partial class ConversationPanel : UserControl, System.ComponentModel.INotifyPropertyChanged
 {
     private string _currentMessage = string.Empty;
-    private string _peerName = string.Empty;
-    private string _peerStatus = string.Empty;
 
     /// <summary>
     /// Event fired when a message is sent
@@ -59,40 +57,33 @@ public sealed partial class ConversationPanel : UserControl, System.ComponentMod
     /// <summary>
     /// Name of the peer being chatted with
     /// </summary>
+    public static readonly DependencyProperty PeerNameProperty =
+        DependencyProperty.Register(nameof(PeerName), typeof(string), typeof(ConversationPanel), 
+            new PropertyMetadata(string.Empty));
+
     public string PeerName
     {
-        get => _peerName;
-        set
-        {
-            if (_peerName != value)
-            {
-                _peerName = value;
-                OnPropertyChanged();
-            }
-        }
+        get => (string)GetValue(PeerNameProperty);
+        set => SetValue(PeerNameProperty, value);
     }
 
     /// <summary>
     /// Status of the peer being chatted with
     /// </summary>
+    public static readonly DependencyProperty PeerStatusProperty =
+        DependencyProperty.Register(nameof(PeerStatus), typeof(string), typeof(ConversationPanel), 
+            new PropertyMetadata(string.Empty));
+
     public string PeerStatus
     {
-        get => _peerStatus;
-        set
-        {
-            if (_peerStatus != value)
-            {
-                _peerStatus = value;
-                OnPropertyChanged();
-            }
-        }
+        get => (string)GetValue(PeerStatusProperty);
+        set => SetValue(PeerStatusProperty, value);
     }
 
     public ConversationPanel()
     {
         this.InitializeComponent();
         Messages = new ObservableCollection<MessageInfo>();
-        MessagesRepeater.ItemsSource = Messages;
     }
 
     /// <summary>
@@ -155,10 +146,7 @@ public sealed partial class ConversationPanel : UserControl, System.ComponentMod
 
     private void EmojiButton_Click(object sender, RoutedEventArgs e)
     {
-        // Position popup near the emoji button
-        EmojiPopup.HorizontalOffset = 0;
-        EmojiPopup.VerticalOffset = -300; // Above the input area
-        EmojiPopup.IsOpen = true;
+        EmojiTeachingTip.IsOpen = true;
     }
 
     private void EmojiPicker_EmojiSelected(object? sender, string emoji)
@@ -166,7 +154,7 @@ public sealed partial class ConversationPanel : UserControl, System.ComponentMod
         CurrentMessage += emoji;
         MessageTextBox.Focus(FocusState.Programmatic);
         MessageTextBox.SelectionStart = CurrentMessage.Length;
-        EmojiPopup.IsOpen = false;
+        EmojiTeachingTip.IsOpen = false;
     }
 
     private async void FileButton_Click(object sender, RoutedEventArgs e)

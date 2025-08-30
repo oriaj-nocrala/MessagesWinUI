@@ -64,9 +64,25 @@ public sealed partial class MainWindow : Window
     /// </summary>
     private void PeersListView_ItemClick(object sender, ItemClickEventArgs e)
     {
-        if (e.ClickedItem is PeerInfo peer && peer.IsConnected)
+        try
         {
-            ViewModel.StartConversationCommand.Execute(peer.Id);
+            if (e.ClickedItem is PeerInfo peer)
+            {
+                System.Diagnostics.Debug.WriteLine($"Peer clicked: {peer.Name}, IsConnected: {peer.IsConnected}");
+                if (peer.IsConnected)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Starting conversation with peer: {peer.Id}");
+                    ViewModel.StartConversationCommand.Execute(peer.Id);
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"Peer {peer.Name} is not connected, cannot start conversation");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Exception in PeersListView_ItemClick: {ex}");
         }
     }
 
@@ -104,13 +120,18 @@ public sealed partial class MainWindow : Window
     }
 
     /// <summary>
-    /// Handles connect button clicks from DataTemplate
+    /// Handles connect button clicks from inline DataTemplate
     /// </summary>
     private void ConnectButton_Click(object sender, RoutedEventArgs _)
     {
         if (sender is Button button && button.CommandParameter is string peerId)
         {
+            System.Diagnostics.Debug.WriteLine($"Connect button clicked with peerId: {peerId}");
             ViewModel.ConnectToPeerCommand.Execute(peerId);
+        }
+        else
+        {
+            System.Diagnostics.Debug.WriteLine("Connect button clicked but no peerId found");
         }
     }
 

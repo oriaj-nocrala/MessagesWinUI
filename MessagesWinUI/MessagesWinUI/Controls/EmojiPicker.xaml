@@ -10,9 +10,9 @@
         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
         BorderThickness="1"
         CornerRadius="8"
-        Padding="12"
-        Width="320"
-        Height="280">
+        Padding="8"
+        Width="280"
+        Height="240">
         
         <Grid>
             <Grid.RowDefinitions>
@@ -26,7 +26,7 @@
                 Text="{x:Bind helpers:LocalizationHelper.GetString('ChooseEmoji')}"
                 FontSize="14"
                 FontWeight="SemiBold"
-                Margin="0,0,0,8" />
+                Margin="0,0,0,6" />
 
             <!-- Emoji Grid -->
             <ScrollViewer 
@@ -49,16 +49,17 @@
                             <Button
                                 Content="{x:Bind}"
                                 FontFamily="Segoe UI Emoji"
-                                FontSize="20"
-                                Width="44"
-                                Height="44"
+                                FontSize="18"
+                                Width="48"
+                                Height="48"
                                 Background="Transparent"
                                 BorderThickness="0"
                                 CornerRadius="8"
                                 Click="EmojiButton_Click"
                                 Tag="{x:Bind}"
                                 HorizontalContentAlignment="Center"
-                                VerticalContentAlignment="Center">
+                                VerticalContentAlignment="Center"
+                                Padding="2">
                             </Button>
                         </DataTemplate>
                     </ItemsRepeater.ItemTemplate>

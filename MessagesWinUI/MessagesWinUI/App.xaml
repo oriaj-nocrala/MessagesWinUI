@@ -9,7 +9,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
-                <ResourceDictionary Source="Resources/DataTemplates.xaml" />
+                <ResourceDictionary Source="ms-appx:///Resources/DataTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
             
             <!-- Converters -->

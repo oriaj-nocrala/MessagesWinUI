@@ -102,7 +102,7 @@
             <ItemsRepeater 
                 x:Name="MessagesRepeater"
                 ItemTemplate="{StaticResource MessageTemplateSelector}"
-                ItemsSource="{x:Bind Messages, Mode=OneWay}">
+                ItemsSource="{Binding Messages, Mode=OneWay}">
                 <ItemsRepeater.Layout>
                     <StackLayout Spacing="4" />
                 </ItemsRepeater.Layout>
@@ -126,51 +126,51 @@
                 <!-- Input Area -->
                 <Grid Grid.Column="0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <!-- Emoji Button -->
-                    <Button 
-                        x:Name="EmojiButton"
-                        Grid.Column="0"
-                        Width="32" 
-                        Height="32" 
-                        Margin="0,0,8,0"
-                        Padding="0"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        ToolTipService.ToolTip="{x:Bind helpers:LocalizationHelper.GetString('AddEmoji')}"
-                        Click="EmojiButton_Click">
-                        <FontIcon Glyph="&#xE76E;" FontSize="16" />
-                    </Button>
 
                     <!-- Text Input -->
                     <TextBox 
                         x:Name="MessageTextBox"
-                        Grid.Column="1"
+                        Grid.Column="0"
+                        Margin="0,0,8,0"
                         PlaceholderText="{x:Bind helpers:LocalizationHelper.GetString('MessagePlaceholder')}"
                         AcceptsReturn="False"
                         MaxLength="1000"
                         TextWrapping="Wrap"
                         KeyDown="MessageTextBox_KeyDown"
-                        Text="{x:Bind CurrentMessage, Mode=TwoWay}" />
-
-                    <!-- File Button -->
-                    <Button 
-                        x:Name="FileButton"
-                        Grid.Column="2"
-                        Width="32" 
-                        Height="32" 
-                        Margin="8,0,0,0"
-                        Padding="0"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        ToolTipService.ToolTip="{x:Bind helpers:LocalizationHelper.GetString('SendFile')}"
-                        Click="FileButton_Click">
-                        <FontIcon Glyph="&#xE7C3;" FontSize="16" />
-                    </Button>
+                        Text="{x:Bind CurrentMessage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    
+                    <!-- Action Buttons -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                        <!-- File Button -->
+                        <Button 
+                            x:Name="FileButton"
+                            Width="32" 
+                            Height="32" 
+                            Padding="0"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            ToolTipService.ToolTip="{x:Bind helpers:LocalizationHelper.GetString('SendFile')}"
+                            Click="FileButton_Click">
+                            <FontIcon Glyph="&#xE7C3;" FontSize="16" />
+                        </Button>
+                        
+                        <!-- Emoji Button -->
+                        <Button 
+                            x:Name="EmojiButton"
+                            Width="32" 
+                            Height="32" 
+                            Padding="0"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            ToolTipService.ToolTip="{x:Bind helpers:LocalizationHelper.GetString('AddEmoji')}"
+                            Click="EmojiButton_Click">
+                            <FontIcon Glyph="&#xE76E;" FontSize="16" />
+                        </Button>
+                    </StackPanel>
                 </Grid>
 
                 <!-- Send Button -->
@@ -186,12 +186,14 @@
             </Grid>
         </Border>
 
-        <!-- Emoji Picker Popup -->
-        <Popup 
-            x:Name="EmojiPopup"
+        <!-- Emoji Picker TeachingTip -->
+        <TeachingTip 
+            x:Name="EmojiTeachingTip"
+            Target="{x:Bind EmojiButton}"
+            PreferredPlacement="Top"
             IsLightDismissEnabled="True"
-            LightDismissOverlayMode="On">
+            ShouldConstrainToRootBounds="False">
             <controls:EmojiPicker x:Name="EmojiPickerControl" EmojiSelected="EmojiPicker_EmojiSelected" />
-        </Popup>
+        </TeachingTip>
     </Grid>
 </UserControl>

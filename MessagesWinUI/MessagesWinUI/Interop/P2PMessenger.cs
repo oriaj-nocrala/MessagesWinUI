@@ -155,8 +155,11 @@ public class P2PMessenger : IDisposable
         if (string.IsNullOrWhiteSpace(peerId))
             throw new ArgumentException("Peer ID cannot be null or empty", nameof(peerId));
 
+        System.Diagnostics.Debug.WriteLine($"Calling native connect for peer: {peerId}");
         var result = NativeMethods.p2p_connect_to_peer(_handle, peerId);
+        System.Diagnostics.Debug.WriteLine($"Native connect returned result: {result} for peer: {peerId}");
         ThrowIfError(result, $"Failed to connect to peer {peerId}");
+        System.Diagnostics.Debug.WriteLine($"Native connect successful for peer: {peerId}");
     }
 
     /// <summary>

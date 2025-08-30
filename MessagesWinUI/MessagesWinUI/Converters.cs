@@ -103,13 +103,13 @@ public class NullToVisibilityConverter : IValueConverter
 }
 
 /// <summary>
-/// Converter that converts null to inverse visibility (visible if null)
+/// Converter that converts null to inverse visibility (visible if NOT null)
 /// </summary>
 public class NullToInverseVisibilityConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
     {
-        return value == null ? Visibility.Visible : Visibility.Collapsed;
+        return value == null ? Visibility.Collapsed : Visibility.Visible;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)

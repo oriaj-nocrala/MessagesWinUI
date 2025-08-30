@@ -238,13 +238,20 @@ public class MainWindowViewModel : BaseViewModel, IDisposable
 
     private void OnPeerConnected(object? sender, PeerConnectedEventArgs e)
     {
+        System.Diagnostics.Debug.WriteLine($"PeerConnected event fired for: {e.PeerId} ({e.PeerName})");
         _dispatcherQueue.TryEnqueue(() =>
         {
             var peer = Peers.FirstOrDefault(p => p.Id == e.PeerId);
             if (peer != null)
             {
+                System.Diagnostics.Debug.WriteLine($"Updating peer {e.PeerName} to connected state. Was: {peer.IsConnected}");
                 peer.IsConnected = true;
                 peer.UpdateLastSeen();
+                System.Diagnostics.Debug.WriteLine($"Peer {e.PeerName} is now connected: {peer.IsConnected}, Status: {peer.Status}");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"Peer {e.PeerId} not found in Peers list");
             }
         });
     }
@@ -314,11 +321,18 @@ public class MainWindowViewModel : BaseViewModel, IDisposable
 
     private void ConnectToPeer(string? peerId)
     {
-        if (string.IsNullOrEmpty(peerId)) return;
+        if (string.IsNullOrEmpty(peerId))
+        {
+            System.Diagnostics.Debug.WriteLine("ConnectToPeer called with null/empty peerId");
+            return;
+        }
+
+        System.Diagnostics.Debug.WriteLine($"Attempting to connect to peer: {peerId}");
 
         try
         {
             _messenger.ConnectToPeer(peerId);
+            System.Diagnostics.Debug.WriteLine($"Native connect call completed for peer: {peerId}");
         }
         catch (Exception ex)
         {
@@ -341,9 +355,11 @@ public class MainWindowViewModel : BaseViewModel, IDisposable
 
         try
         {
+            System.Diagnostics.Debug.WriteLine($"Sending message: '{args.message}' to peer: {args.peerId}");
             _messenger.SendTextMessage(args.peerId, args.message);
             
             var conversation = GetOrCreateConversation(args.peerId, GetPeerName(args.peerId));
+            System.Diagnostics.Debug.WriteLine($"Got conversation: {conversation?.PeerName}");
             
             var message = new MessageInfo
             {
@@ -354,7 +370,9 @@ public class MainWindowViewModel : BaseViewModel, IDisposable
                 MessageType = MessageType.Text
             };
             
+            System.Diagnostics.Debug.WriteLine($"Adding sent message to conversation: {message.Content}");
             conversation.AddMessage(message);
+            System.Diagnostics.Debug.WriteLine($"Message added, conversation now has {conversation.Messages.Count} messages");
         }
         catch (Exception ex)
         {
@@ -410,10 +428,21 @@ public class MainWindowViewModel : BaseViewModel, IDisposable
 
     private void StartConversation(string? peerId)
     {
-        if (string.IsNullOrEmpty(peerId)) return;
+        if (string.IsNullOrEmpty(peerId))
+        {
+            System.Diagnostics.Debug.WriteLine("StartConversation called with null/empty peerId");
+            return;
+        }
         
-        var conversation = GetOrCreateConversation(peerId, GetPeerName(peerId));
+        System.Diagnostics.Debug.WriteLine($"StartConversation called for peerId: {peerId}");
+        var peerName = GetPeerName(peerId);
+        System.Diagnostics.Debug.WriteLine($"Peer name resolved: {peerName}");
+        
+        var conversation = GetOrCreateConversation(peerId, peerName);
+        System.Diagnostics.Debug.WriteLine($"Conversation created/retrieved: {conversation?.PeerName}");
+        
         SelectedConversation = conversation;
+        System.Diagnostics.Debug.WriteLine($"SelectedConversation set to: {SelectedConversation?.PeerName}");
     }
 
     private void CloseConversation(string? peerId)
