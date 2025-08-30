@@ -14,18 +14,96 @@
     Title="{x:Bind ViewModel.AppTitle}">
 
     <Window.SystemBackdrop>
-        <MicaBackdrop />
+        <DesktopAcrylicBackdrop />
     </Window.SystemBackdrop>
 
     <Grid DataContext="{x:Bind ViewModel}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
+        <!-- 🔥 EPIC CUSTOM TITLE BAR -->
+        <Border x:Name="AppTitleBar" 
+                Grid.Row="0" 
+                Height="48"
+                Background="Transparent"
+                Canvas.ZIndex="100">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- 🎨 App Icon & Title -->
+                <StackPanel Grid.Column="0" 
+                           Orientation="Horizontal" 
+                           VerticalAlignment="Center"
+                           Margin="16,0,0,0">
+                    <FontIcon Glyph="&#xE8BD;" 
+                             FontSize="16" 
+                             Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                             Margin="0,0,8,0"/>
+                    <TextBlock Text="MessagesWinUI P2P" 
+                              FontSize="14" 
+                              FontWeight="SemiBold"
+                              VerticalAlignment="Center"
+                              Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
+                    <Border Background="{ThemeResource AccentFillColorDefaultBrush}"
+                           CornerRadius="10"
+                           Padding="6,2"
+                           Margin="8,0,0,0">
+                        <TextBlock Text="BRUTAL" 
+                                  FontSize="10"
+                                  FontWeight="Bold"
+                                  Foreground="White"/>
+                    </Border>
+                </StackPanel>
+
+                <!-- 🌐 Live Connection Status -->
+                <StackPanel Grid.Column="1" 
+                           Orientation="Horizontal" 
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center">
+                    <Ellipse Width="8" Height="8" 
+                            Fill="{ThemeResource SystemFillColorSuccessBrush}"
+                            Margin="0,0,6,0"/>
+                    <TextBlock Text="{Binding ConnectionStatus}" 
+                              FontSize="12"
+                              Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                </StackPanel>
+
+                <!-- 🎵 Audio Visualizer (fake for now) -->
+                <StackPanel Grid.Column="2" 
+                           Orientation="Horizontal" 
+                           VerticalAlignment="Center"
+                           Margin="0,0,20,0">
+                    <Rectangle Width="2" Height="6" Fill="{ThemeResource AccentFillColorDefaultBrush}" Margin="1"/>
+                    <Rectangle Width="2" Height="10" Fill="{ThemeResource AccentFillColorDefaultBrush}" Margin="1"/>
+                    <Rectangle Width="2" Height="4" Fill="{ThemeResource AccentFillColorDefaultBrush}" Margin="1"/>
+                    <Rectangle Width="2" Height="8" Fill="{ThemeResource AccentFillColorDefaultBrush}" Margin="1"/>
+                    <Rectangle Width="2" Height="6" Fill="{ThemeResource AccentFillColorDefaultBrush}" Margin="1"/>
+                </StackPanel>
+
+                <!-- 🔥 Theme Toggle Button -->
+                <ToggleButton Grid.Column="3"
+                             Width="32" Height="32"
+                             Margin="0,0,12,0"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             ToolTipService.ToolTip="Toggle Theme"
+                             Click="ThemeToggle_Click">
+                    <FontIcon Glyph="&#xE793;" FontSize="16"/>
+                </ToggleButton>
+            </Grid>
+        </Border>
+
         <!-- Top Bar -->
-        <Border Grid.Row="0" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" 
+        <Border Grid.Row="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" 
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
             <StackPanel Orientation="Horizontal" Padding="16,8" Spacing="12">
                 <PersonPicture Width="32" Height="32" DisplayName="{Binding CurrentUserName, Mode=OneWay}" />
@@ -42,7 +120,7 @@
         </Border>
 
         <!-- Main Content Area -->
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="280" />
                 <ColumnDefinition Width="*" />
@@ -59,7 +137,7 @@
                     
                     <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="16,16,16,8">
                         <TextBlock Text="{Binding PeersText}" FontSize="16" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding PeerCount, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding PeerCount, Mode=OneWay}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" Margin="8,0,0,0" />
                     </StackPanel>
                     
                     <ListView Grid.Row="1" 
@@ -189,7 +267,7 @@
         </Grid>
 
         <!-- Status Bar -->
-        <Border Grid.Row="2" Background="{ThemeResource LayerFillColorDefaultBrush}" 
+        <Border Grid.Row="3" Background="{ThemeResource LayerFillColorDefaultBrush}" 
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0">
             <StackPanel Orientation="Horizontal" Padding="16,8" Spacing="16">
                 <TextBlock Text="{Binding ConnectionStatus, Mode=OneWay}" FontSize="12" />

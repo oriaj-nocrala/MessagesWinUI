@@ -21,6 +21,7 @@ public class MainWindowViewModel : BaseViewModel, IDisposable
     private readonly DispatcherQueue _dispatcherQueue;
     private readonly DispatcherQueueTimer _discoveryTimer;
     private readonly DispatcherQueueTimer _cleanupTimer;
+    private bool _isDisposed = false;
     
     private string _currentUserName = "You";
     private string _connectionStatus = "";
@@ -210,8 +211,11 @@ public class MainWindowViewModel : BaseViewModel, IDisposable
 
     private void OnPeerDiscovered(object? sender, PeerDiscoveredEventArgs e)
     {
+        if (_isDisposed) return;
+        
         _dispatcherQueue.TryEnqueue(() =>
         {
+            if (_isDisposed) return;
             // Filter out self
             if (e.PeerName.Equals(CurrentUserName, StringComparison.OrdinalIgnoreCase))
                 return;
@@ -238,9 +242,12 @@ public class MainWindowViewModel : BaseViewModel, IDisposable
 
     private void OnPeerConnected(object? sender, PeerConnectedEventArgs e)
     {
+        if (_isDisposed) return;
+        
         System.Diagnostics.Debug.WriteLine($"PeerConnected event fired for: {e.PeerId} ({e.PeerName})");
         _dispatcherQueue.TryEnqueue(() =>
         {
+            if (_isDisposed) return;
             var peer = Peers.FirstOrDefault(p => p.Id == e.PeerId);
             if (peer != null)
             {
@@ -248,6 +255,18 @@ public class MainWindowViewModel : BaseViewModel, IDisposable
                 peer.IsConnected = true;
                 peer.UpdateLastSeen();
                 System.Diagnostics.Debug.WriteLine($"Peer {e.PeerName} is now connected: {peer.IsConnected}, Status: {peer.Status}");
+                
+                // Show advanced connection notification
+                NotificationHelper.ShowConnectionStatusNotification(e.PeerName, true, e.PeerId);
+                
+                // Show celebration for first connection
+                if (Peers.Count(p => p.IsConnected) == 1)
+                {
+                    NotificationHelper.ShowCelebrationNotification(
+                        "First P2P Connection!", 
+                        $"You're now connected to {e.PeerName}. Start chatting!",
+                        "firstConnection");
+                }
             }
             else
             {
@@ -258,20 +277,29 @@ public class MainWindowViewModel : BaseViewModel, IDisposable
 
     private void OnPeerDisconnected(object? sender, PeerDisconnectedEventArgs e)
     {
+        if (_isDisposed) return;
+        
         _dispatcherQueue.TryEnqueue(() =>
         {
+            if (_isDisposed) return;
             var peer = Peers.FirstOrDefault(p => p.Id == e.PeerId);
             if (peer != null)
             {
                 peer.IsConnected = false;
+                
+                // Show advanced disconnection notification
+                NotificationHelper.ShowConnectionStatusNotification(e.PeerName, false, e.PeerId);
             }
         });
     }
 
     private void OnMessageReceived(object? sender, MessageReceivedEventArgs e)
     {
+        if (_isDisposed) return;
+        
         _dispatcherQueue.TryEnqueue(() =>
         {
+            if (_isDisposed) return;
             var conversation = GetOrCreateConversation(e.SenderId, e.SenderName);
             
             var message = new MessageInfo
@@ -284,13 +312,19 @@ public class MainWindowViewModel : BaseViewModel, IDisposable
             };
             
             conversation.AddMessage(message);
+            
+            // Show advanced interactive notification for new message
+            NotificationHelper.ShowAdvancedMessageNotification(e.SenderName, e.Message, e.SenderId);
         });
     }
 
     private void OnFileReceived(object? sender, FileReceivedEventArgs e)
     {
+        if (_isDisposed) return;
+        
         _dispatcherQueue.TryEnqueue(() =>
         {
+            if (_isDisposed) return;
             var conversation = GetOrCreateConversation(e.SenderId, e.SenderName);
             
             var message = new MessageInfo
@@ -543,12 +577,63 @@ public class MainWindowViewModel : BaseViewModel, IDisposable
 
     public void Dispose()
     {
-        _discoveryTimer?.Stop();
-        _cleanupTimer?.Stop();
-        _messenger?.Stop();
-        _messenger?.Dispose();
-        
-        Conversations.Clear();
-        Peers.Clear();
+        try
+        {
+            if (_isDisposed) return;
+            _isDisposed = true;
+            
+            System.Diagnostics.Debug.WriteLine("🧹 Starting ViewModel cleanup...");
+            
+            // Stop and dispose messenger FIRST to avoid callbacks during cleanup
+            if (_messenger != null)
+            {
+                // Unsubscribe from all events BEFORE stopping to prevent UI access
+                _messenger.PeerDiscovered -= OnPeerDiscovered;
+                _messenger.PeerConnected -= OnPeerConnected;
+                _messenger.PeerDisconnected -= OnPeerDisconnected;
+                _messenger.MessageReceived -= OnMessageReceived;
+                _messenger.FileReceived -= OnFileReceived;
+                
+                // Now safely stop and dispose
+                _messenger.Stop();
+                _messenger.Dispose();
+                System.Diagnostics.Debug.WriteLine("✅ Messenger stopped and disposed");
+            }
+            
+            // Stop timers after messenger is disposed
+            if (_discoveryTimer != null)
+            {
+                _discoveryTimer.Stop();
+                System.Diagnostics.Debug.WriteLine("✅ Discovery timer stopped");
+            }
+            
+            if (_cleanupTimer != null)
+            {
+                _cleanupTimer.Stop();
+                System.Diagnostics.Debug.WriteLine("✅ Cleanup timer stopped");
+            }
+            
+            // Clear collections safely
+            Conversations.Clear();
+            Peers.Clear();
+            
+            // Cleanup notifications (but don't access UI elements)
+            try
+            {
+                NotificationHelper.Cleanup();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"⚠️ Notification cleanup warning: {ex.Message}");
+                // Don't rethrow - this is cleanup
+            }
+            
+            System.Diagnostics.Debug.WriteLine("✅ ViewModel cleanup completed successfully");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"❌ Error during ViewModel disposal: {ex.Message}");
+            // Don't rethrow exceptions during disposal
+        }
     }
 }
