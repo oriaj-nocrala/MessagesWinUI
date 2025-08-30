@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:MessagesWinUI.Models"
+    xmlns:helpers="using:MessagesWinUI.Helpers"
+    xmlns:converters="using:MessagesWinUI.Converters">
+
+    <!-- Message Bubble Styles -->
+    <Style x:Key="MyMessageBubbleStyle" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource SystemAccentColor}" />
+        <Setter Property="CornerRadius" Value="16,16,4,16" />
+        <Setter Property="Padding" Value="12,8,12,8" />
+        <Setter Property="Margin" Value="48,2,12,2" />
+        <Setter Property="HorizontalAlignment" Value="Right" />
+        <Setter Property="MaxWidth" Value="300" />
+    </Style>
+
+    <Style x:Key="OtherMessageBubbleStyle" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="16,16,16,4" />
+        <Setter Property="Padding" Value="12,8,12,8" />
+        <Setter Property="Margin" Value="12,2,48,2" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="MaxWidth" Value="300" />
+    </Style>
+
+    <!-- Message Content Templates -->
+    <DataTemplate x:Key="TextMessageTemplate">
+        <Border Style="{Binding IsFromMe, Converter={StaticResource MessageBubbleStyleConverter}}">
+            <StackPanel>
+                <!-- Sender name (only for other users) -->
+                <TextBlock 
+                    Text="{Binding SenderName}"
+                    FontSize="11"
+                    FontWeight="SemiBold"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Margin="0,0,0,2"
+                    Visibility="{Binding IsFromOther, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                
+                <!-- Message content -->
+                <TextBlock 
+                    Text="{Binding Content}"
+                    TextWrapping="Wrap"
+                    FontSize="14"
+                    Foreground="{Binding IsFromMe, Converter={StaticResource MessageForegroundConverter}}"
+                    IsTextSelectionEnabled="True" />
+                
+                <!-- Timestamp -->
+                <TextBlock 
+                    Text="{Binding TimeDisplay}"
+                    FontSize="10"
+                    Margin="0,4,0,0"
+                    HorizontalAlignment="Right"
+                    Foreground="{Binding IsFromMe, Converter={StaticResource MessageTimeForegroundConverter}}"
+                    ToolTipService.ToolTip="{Binding FullTimeDisplay}" />
+            </StackPanel>
+        </Border>
+    </DataTemplate>
+
+    <DataTemplate x:Key="SystemMessageTemplate">
+        <Border 
+            Background="{ThemeResource SystemFillColorSolidNeutralBackground}"
+            CornerRadius="8"
+            Padding="12,6"
+            Margin="12,8"
+            HorizontalAlignment="Center">
+            <TextBlock 
+                Text="{Binding Content}"
+                FontSize="12"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                TextAlignment="Center" />
+        </Border>
+    </DataTemplate>
+
+    <DataTemplate x:Key="FileMessageTemplate">
+        <Border Style="{Binding IsFromMe, Converter={StaticResource MessageBubbleStyleConverter}}">
+            <StackPanel>
+                <!-- Sender name (only for other users) -->
+                <TextBlock 
+                    Text="{Binding SenderName}"
+                    FontSize="11"
+                    FontWeight="SemiBold"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Margin="0,0,0,4"
+                    Visibility="{Binding IsFromOther, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                
+                <!-- File icon and info -->
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon 
+                        Glyph="&#xE7C3;" 
+                        FontSize="24"
+                        Foreground="{Binding IsFromMe, Converter={StaticResource MessageForegroundConverter}}" />
+                    <StackPanel>
+                        <TextBlock 
+                            Text="{Binding Content}"
+                            FontSize="14"
+                            FontWeight="SemiBold"
+                            Foreground="{Binding IsFromMe, Converter={StaticResource MessageForegroundConverter}}"
+                            TextTrimming="CharacterEllipsis" />
+                        <TextBlock 
+                            Text="File"
+                            FontSize="12"
+                            Foreground="{Binding IsFromMe, Converter={StaticResource MessageTimeForegroundConverter}}" />
+                    </StackPanel>
+                </StackPanel>
+                
+                <!-- Timestamp -->
+                <TextBlock 
+                    Text="{Binding TimeDisplay}"
+                    FontSize="10"
+                    Margin="0,4,0,0"
+                    HorizontalAlignment="Right"
+                    Foreground="{Binding IsFromMe, Converter={StaticResource MessageTimeForegroundConverter}}"
+                    ToolTipService.ToolTip="{Binding FullTimeDisplay}" />
+            </StackPanel>
+        </Border>
+    </DataTemplate>
+
+    <!-- Message Template Selector -->
+    <converters:MessageTemplateSelector 
+        x:Key="MessageTemplateSelector"
+        TextMessageTemplate="{StaticResource TextMessageTemplate}"
+        SystemMessageTemplate="{StaticResource SystemMessageTemplate}"
+        FileMessageTemplate="{StaticResource FileMessageTemplate}" />
+
+    <!-- Peer Item Template -->
+    <DataTemplate x:Key="PeerItemTemplate">
+        <Grid Padding="12,8" Background="Transparent">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            
+            <!-- Avatar -->
+            <PersonPicture 
+                Grid.Column="0"
+                Width="32" 
+                Height="32" 
+                DisplayName="{Binding Name}" 
+                Margin="0,0,12,0" />
+            
+            <!-- Peer Info -->
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock 
+                    Text="{Binding Name}" 
+                    FontWeight="SemiBold" 
+                    FontSize="14" 
+                    TextTrimming="CharacterEllipsis" />
+                <TextBlock 
+                    Text="{Binding Status}" 
+                    FontSize="12" 
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <TextBlock 
+                    Text="{Binding LastSeenDisplay}" 
+                    FontSize="11" 
+                    Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+            </StackPanel>
+            
+            <!-- Connection Button/Status -->
+            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                <Button 
+                    Content="Connect"
+                    FontSize="11" 
+                    Padding="12,4" 
+                    CommandParameter="{Binding Id}"
+                    Click="ConnectButton_Click"
+                    Visibility="{Binding IsConnected, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+                
+                <Border
+                    Background="{ThemeResource SystemFillColorSuccessBackground}"
+                    CornerRadius="12"
+                    Padding="8,2"
+                    Visibility="{Binding IsConnected, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock 
+                        Text="Connected" 
+                        FontSize="10"
+                        FontWeight="SemiBold"
+                        Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                        HorizontalAlignment="Center" />
+                </Border>
+            </StackPanel>
+        </Grid>
+    </DataTemplate>
+
+</ResourceDictionary>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="MessagesWinUI.Controls.EmojiPicker"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helpers="using:MessagesWinUI.Helpers">
+
+    <Border
+        Background="{ThemeResource LayerFillColorDefaultBrush}"
+        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+        BorderThickness="1"
+        CornerRadius="8"
+        Padding="12"
+        Width="320"
+        Height="280">
+        
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <TextBlock 
+                Grid.Row="0"
+                Text="{x:Bind helpers:LocalizationHelper.GetString('ChooseEmoji')}"
+                FontSize="14"
+                FontWeight="SemiBold"
+                Margin="0,0,0,8" />
+
+            <!-- Emoji Grid -->
+            <ScrollViewer 
+                Grid.Row="1"
+                ZoomMode="Disabled"
+                HorizontalScrollMode="Disabled"
+                VerticalScrollBarVisibility="Auto">
+                
+                <ItemsRepeater x:Name="EmojiRepeater">
+                    <ItemsRepeater.Layout>
+                        <UniformGridLayout 
+                            Orientation="Horizontal" 
+                            MaximumRowsOrColumns="5" 
+                            MinItemWidth="50" 
+                            MinItemHeight="50" />
+                    </ItemsRepeater.Layout>
+                    
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="x:String">
+                            <Button
+                                Content="{x:Bind}"
+                                FontFamily="Segoe UI Emoji"
+                                FontSize="20"
+                                Width="44"
+                                Height="44"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                CornerRadius="8"
+                                Click="EmojiButton_Click"
+                                Tag="{x:Bind}"
+                                HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center">
+                            </Button>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+            </ScrollViewer>
+        </Grid>
+    </Border>
+</UserControl>

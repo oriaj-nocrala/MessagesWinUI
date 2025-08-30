@@ -13,10 +13,13 @@ public class P2PMessenger : IDisposable
     private bool _disposed = false;
 
     // Events
-    public event EventHandler<PeerEventArgs>? PeerDiscovered;
-    public event EventHandler<PeerEventArgs>? PeerConnected;
-    public event EventHandler<PeerEventArgs>? PeerDisconnected;
+    public event EventHandler<PeerDiscoveredEventArgs>? PeerDiscovered;
+    public event EventHandler<PeerConnectedEventArgs>? PeerConnected;
+    public event EventHandler<PeerDisconnectedEventArgs>? PeerDisconnected;
     public event EventHandler<MessageReceivedEventArgs>? MessageReceived;
+    #pragma warning disable CS0067 // Event is never used - reserved for future file transfer functionality
+    public event EventHandler<FileReceivedEventArgs>? FileReceived;
+    #pragma warning restore CS0067
     public event EventHandler<ErrorEventArgs>? Error;
 
     /// <summary>
@@ -217,17 +220,17 @@ public class P2PMessenger : IDisposable
             {
                 case NativeMethods.EVENT_PEER_DISCOVERED:
                     if (peerId != null && peerName != null)
-                        PeerDiscovered?.Invoke(this, new PeerEventArgs(P2PEventType.PeerDiscovered, peerId, peerName));
+                        PeerDiscovered?.Invoke(this, new PeerDiscoveredEventArgs(peerId, peerName));
                     break;
 
                 case NativeMethods.EVENT_PEER_CONNECTED:
                     if (peerId != null && peerName != null)
-                        PeerConnected?.Invoke(this, new PeerEventArgs(P2PEventType.PeerConnected, peerId, peerName));
+                        PeerConnected?.Invoke(this, new PeerConnectedEventArgs(peerId, peerName));
                     break;
 
                 case NativeMethods.EVENT_PEER_DISCONNECTED:
                     if (peerId != null && peerName != null)
-                        PeerDisconnected?.Invoke(this, new PeerEventArgs(P2PEventType.PeerDisconnected, peerId, peerName));
+                        PeerDisconnected?.Invoke(this, new PeerDisconnectedEventArgs(peerId, peerName));
                     break;
 
                 case NativeMethods.EVENT_MESSAGE_RECEIVED:

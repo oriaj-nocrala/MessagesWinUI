@@ -29,13 +29,13 @@ internal static class NativeMethods
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void EventCallback(int eventType, IntPtr peerId, IntPtr peerName, IntPtr message);
 
-    // Core functions
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-    public static extern IntPtr p2p_create_messenger([MarshalAs(UnmanagedType.LPStr)] string name);
+    // Core functions - Unicode/UTF-8 Support
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+    public static extern IntPtr p2p_create_messenger([MarshalAs(UnmanagedType.LPUTF8Str)] string name);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
     public static extern IntPtr p2p_create_messenger_with_ports(
-        [MarshalAs(UnmanagedType.LPStr)] string name, 
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string name, 
         ushort tcpPort, 
         ushort discoveryPort);
 
@@ -58,7 +58,7 @@ internal static class NativeMethods
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
     public static extern IntPtr p2p_get_local_ip(IntPtr handle);
 
-    // Discovery and connection
+    // Discovery and connection - Unicode/UTF-8 Support
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
     public static extern int p2p_discover_peers(IntPtr handle);
 
@@ -68,28 +68,28 @@ internal static class NativeMethods
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
     public static extern int p2p_get_connected_peers_count(IntPtr handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
     public static extern int p2p_connect_to_peer(
         IntPtr handle, 
-        [MarshalAs(UnmanagedType.LPStr)] string peerId);
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string peerId);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
     public static extern int p2p_disconnect_peer(
         IntPtr handle, 
-        [MarshalAs(UnmanagedType.LPStr)] string peerId);
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string peerId);
 
-    // Messaging
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    // Messaging - Unicode/UTF-8 Support  
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
     public static extern int p2p_send_text_message(
         IntPtr handle, 
-        [MarshalAs(UnmanagedType.LPStr)] string peerId, 
-        [MarshalAs(UnmanagedType.LPStr)] string message);
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string peerId, 
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string message);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
     public static extern int p2p_send_file(
         IntPtr handle, 
-        [MarshalAs(UnmanagedType.LPStr)] string peerId, 
-        [MarshalAs(UnmanagedType.LPStr)] string filePath);
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string peerId, 
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string filePath);
 
     // Event handling
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
@@ -99,13 +99,14 @@ internal static class NativeMethods
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
     public static extern void p2p_free_string(IntPtr strPtr);
 
-    // Helper method to convert native string to C# string
+    // Helper method to convert native UTF-8 string to C# string
     public static string? PtrToString(IntPtr ptr)
     {
         if (ptr == IntPtr.Zero)
             return null;
         
-        var result = Marshal.PtrToStringAnsi(ptr);
+        // Use UTF-8 marshalling instead of ANSI
+        var result = Marshal.PtrToStringUTF8(ptr);
         p2p_free_string(ptr);
         return result;
     }

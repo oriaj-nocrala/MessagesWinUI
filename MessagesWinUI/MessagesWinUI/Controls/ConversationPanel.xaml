@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="MessagesWinUI.Controls.ConversationPanel"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:MessagesWinUI.Models"
+    xmlns:helpers="using:MessagesWinUI.Helpers"
+    xmlns:controls="using:MessagesWinUI.Controls">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Conversation Header -->
+        <Border 
+            Grid.Row="0"
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="0,0,0,1"
+            Padding="16,12">
+            
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Peer Avatar -->
+                <PersonPicture 
+                    Grid.Column="0"
+                    Width="32" 
+                    Height="32" 
+                    DisplayName="{x:Bind PeerName, Mode=OneWay}" 
+                    Margin="0,0,12,0" />
+
+                <!-- Peer Info -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock 
+                        Text="{x:Bind PeerName, Mode=OneWay}" 
+                        FontWeight="SemiBold" 
+                        FontSize="14" />
+                    <TextBlock 
+                        Text="{x:Bind PeerStatus, Mode=OneWay}" 
+                        FontSize="12" 
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+
+                <!-- Action Buttons -->
+                <StackPanel 
+                    Grid.Column="2" 
+                    Orientation="Horizontal" 
+                    Spacing="8"
+                    VerticalAlignment="Center">
+                    
+                    <Button 
+                        Width="32" 
+                        Height="32" 
+                        Padding="0"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        ToolTipService.ToolTip="{x:Bind helpers:LocalizationHelper.GetString('VideoCall')}">
+                        <FontIcon Glyph="&#xE8AA;" FontSize="16" />
+                    </Button>
+                    
+                    <Button 
+                        Width="32" 
+                        Height="32" 
+                        Padding="0"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        ToolTipService.ToolTip="{x:Bind helpers:LocalizationHelper.GetString('VoiceCall')}">
+                        <FontIcon Glyph="&#xE717;" FontSize="16" />
+                    </Button>
+                    
+                    <Button 
+                        Width="32" 
+                        Height="32" 
+                        Padding="0"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        ToolTipService.ToolTip="{x:Bind helpers:LocalizationHelper.GetString('MoreOptions')}">
+                        <FontIcon Glyph="&#xE712;" FontSize="16" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Messages Area -->
+        <ScrollViewer 
+            x:Name="MessagesScrollViewer"
+            Grid.Row="1"
+            Padding="8"
+            ZoomMode="Disabled"
+            HorizontalScrollMode="Disabled"
+            VerticalScrollBarVisibility="Auto"
+            Background="{ThemeResource LayerFillColorAltBrush}">
+            
+            <ItemsRepeater 
+                x:Name="MessagesRepeater"
+                ItemTemplate="{StaticResource MessageTemplateSelector}"
+                ItemsSource="{x:Bind Messages, Mode=OneWay}">
+                <ItemsRepeater.Layout>
+                    <StackLayout Spacing="4" />
+                </ItemsRepeater.Layout>
+            </ItemsRepeater>
+        </ScrollViewer>
+
+        <!-- Message Input Area -->
+        <Border 
+            Grid.Row="2"
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="0,1,0,0"
+            Padding="16">
+            
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Input Area -->
+                <Grid Grid.Column="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Emoji Button -->
+                    <Button 
+                        x:Name="EmojiButton"
+                        Grid.Column="0"
+                        Width="32" 
+                        Height="32" 
+                        Margin="0,0,8,0"
+                        Padding="0"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        ToolTipService.ToolTip="{x:Bind helpers:LocalizationHelper.GetString('AddEmoji')}"
+                        Click="EmojiButton_Click">
+                        <FontIcon Glyph="&#xE76E;" FontSize="16" />
+                    </Button>
+
+                    <!-- Text Input -->
+                    <TextBox 
+                        x:Name="MessageTextBox"
+                        Grid.Column="1"
+                        PlaceholderText="{x:Bind helpers:LocalizationHelper.GetString('MessagePlaceholder')}"
+                        AcceptsReturn="False"
+                        MaxLength="1000"
+                        TextWrapping="Wrap"
+                        KeyDown="MessageTextBox_KeyDown"
+                        Text="{x:Bind CurrentMessage, Mode=TwoWay}" />
+
+                    <!-- File Button -->
+                    <Button 
+                        x:Name="FileButton"
+                        Grid.Column="2"
+                        Width="32" 
+                        Height="32" 
+                        Margin="8,0,0,0"
+                        Padding="0"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        ToolTipService.ToolTip="{x:Bind helpers:LocalizationHelper.GetString('SendFile')}"
+                        Click="FileButton_Click">
+                        <FontIcon Glyph="&#xE7C3;" FontSize="16" />
+                    </Button>
+                </Grid>
+
+                <!-- Send Button -->
+                <Button 
+                    x:Name="SendButton"
+                    Grid.Column="1"
+                    Content="{x:Bind helpers:LocalizationHelper.GetString('Send')}"
+                    Style="{ThemeResource AccentButtonStyle}"
+                    Margin="12,0,0,0"
+                    Padding="16,6"
+                    IsEnabled="{x:Bind HasMessageText, Mode=OneWay}"
+                    Click="SendButton_Click" />
+            </Grid>
+        </Border>
+
+        <!-- Emoji Picker Popup -->
+        <Popup 
+            x:Name="EmojiPopup"
+            IsLightDismissEnabled="True"
+            LightDismissOverlayMode="On">
+            <controls:EmojiPicker x:Name="EmojiPickerControl" EmojiSelected="EmojiPicker_EmojiSelected" />
+        </Popup>
+    </Grid>
+</UserControl>

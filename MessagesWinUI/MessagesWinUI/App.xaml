@@ -3,16 +3,30 @@
     x:Class="MessagesWinUI.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:MessagesWinUI">
+    xmlns:local="using:MessagesWinUI"
+    xmlns:converters="using:MessagesWinUI.Converters">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <ResourceDictionary Source="Resources/DataTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
             
             <!-- Converters -->
             <local:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <local:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
+            
+            <!-- Message Converters -->
+            <converters:MessageBubbleStyleConverter x:Key="MessageBubbleStyleConverter" />
+            <converters:MessageForegroundConverter x:Key="MessageForegroundConverter" />
+            <converters:MessageTimeForegroundConverter x:Key="MessageTimeForegroundConverter" />
+            
+            <!-- Additional Converters -->
+            <local:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+            <local:CountToVisibilityConverter x:Key="CountToVisibilityConverter" />
+            <local:CountToInverseVisibilityConverter x:Key="CountToInverseVisibilityConverter" />
+            <local:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+            <local:NullToInverseVisibilityConverter x:Key="NullToInverseVisibilityConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>
